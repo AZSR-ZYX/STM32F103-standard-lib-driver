@@ -6,20 +6,20 @@
 void SoftI2C_W_SCL(uint8_t BitValue)
 {
     GPIO_WriteBit(GPIOB,GPIO_Pin_6,(BitAction)BitValue);
-    Delay_ms(10);
+    Delay_ms(5);
 }
 
 void SoftI2C_W_SDA(uint8_t BitValue)
 {
     GPIO_WriteBit(GPIOB,GPIO_Pin_7,(BitAction)BitValue);
-    Delay_ms(10);
+    Delay_ms(5);
 }
 
 uint8_t SoftI2C_R_SDA(void)
 {
     uint8_t BitValue;
     BitValue = GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_7);
-    Delay_ms(10);
+    Delay_ms(5);
     
     return BitValue;
 }
