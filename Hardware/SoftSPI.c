@@ -9,25 +9,16 @@
 #define SPI_GPIO_MISO_Pin GPIO_Pin_14
 #define SPI_GPIO_MOSI_Pin GPIO_Pin_15
 
-static void SoftSPI_SS(uint8_t x)
-{
-    GPIO_WriteBit(SPI_GPIO_Port,SPI_GPIO_SS_Pin,(BitAction)x);
-}
+#define SoftSPI_SS_H ((SPI_GPIO_Port)->BSRR = ((uint32_t)SPI_GPIO_SS_Pin))
+#define SoftSPI_SCK_H ((SPI_GPIO_Port)->BSRR = ((uint32_t)SPI_GPIO_SCK_Pin))
+#define SoftSPI_MOSI_H ((SPI_GPIO_Port)->BSRR = ((uint32_t)SPI_GPIO_MOSI_Pin))
 
-static void SoftSPI_SCK(uint8_t x)
-{
-    GPIO_WriteBit(SPI_GPIO_Port,SPI_GPIO_SCK_Pin,(BitAction)x);
-}
+#define SoftSPI_SS_L ((SPI_GPIO_Port)->BSRR = ((uint32_t)SPI_GPIO_SS_Pin << 16U))
+#define SoftSPI_SCK_L ((SPI_GPIO_Port)->BSRR = ((uint32_t)SPI_GPIO_SCK_Pin << 16U))
+#define SoftSPI_MOSI_L ((SPI_GPIO_Port)->BSRR = ((uint32_t)SPI_GPIO_MOSI_Pin << 16U))
 
-static uint8_t SoftSPI_MISO()
-{
-    return GPIO_ReadInputDataBit(SPI_GPIO_Port,SPI_GPIO_MISO_Pin);
-}
+#define SoftSPI_MISO_RAW() ((SPI_GPIO_Port)->IDR & (SPI_GPIO_MISO_Pin))
 
-static void SoftSPI_MOSI(uint8_t x)
-{
-    GPIO_WriteBit(SPI_GPIO_Port,SPI_GPIO_MOSI_Pin,(BitAction)x);
-}
 
 static void SoftSPI_Init(void)
 {
@@ -44,35 +35,19 @@ static void SoftSPI_Init(void)
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(SPI_GPIO_Port,&GPIO_InitStructure);
     
-    SoftSPI_SS(1);
-    SoftSPI_SCK(0);
+    SoftSPI_SS_H;
+    SoftSPI_SCK_L;
 }
 
-static void SoftSPI_Start(void)
+static inline void SoftSPI_Start()
 {
-    SoftSPI_SS(0);
+    SoftSPI_SS_L;
 }
 
-static void SoftSPI_Stop(void)
+static inline void SoftSPI_Stop()
 {
-    SoftSPI_SS(1);
+    SoftSPI_SS_H;
 }
-
-
-
-//uint8_t SoftSPI_SwapByte(uint8_t byte)
-//{
-//    uint8_t i;
-//    for(i = 0;i < 8;i++)
-//    {
-//    SoftSPI_MOSI(!!(byte & 0x80));
-//    SoftSPI_SCK(1);
-//    byte <<= 1;
-//    byte |= (!!SoftSPI_MISO());
-//    SoftSPI_SCK(0);
-//    }
-//    return byte;
-//}
 
 static uint8_t SoftSPI_SwapByte(uint8_t byte_send)
 {
@@ -80,14 +55,22 @@ static uint8_t SoftSPI_SwapByte(uint8_t byte_send)
     byte_receive = 0x00;
     for(i = 0;i < 8;i++)
     {
-        SoftSPI_MOSI(!!(byte_send & (0x80 >> i)));
-        SoftSPI_SCK(1);
+
+        if (!!(byte_send & (0x80 >> i))) 
+        {
+            SoftSPI_MOSI_H;
+        }
+        else
+        {
+            SoftSPI_MOSI_L;
+        }
+        SoftSPI_SCK_H;
 //    byte_receive |= (!!SoftSPI_MISO() & (0x80 >> i)); 一样的不过下面的可读性强
-        if(SoftSPI_MISO())
+        if(SoftSPI_MISO_RAW())
         {
             byte_receive |= (0x80 >> i);
         }
-        SoftSPI_SCK(0);
+        SoftSPI_SCK_L;
     }
     
     return byte_receive;
