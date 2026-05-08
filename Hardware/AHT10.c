@@ -19,7 +19,6 @@ void AHT10_WaitEvent(I2C_TypeDef* I2Cx, uint32_t I2C_EVENT)
 
 void AHT10_Init(void)
 {
-    uint8_t aht10_status;
     SoftI2C_Init();
     SoftI2C_Start();
     SoftI2C_SendByte(0x70 | 0x01);
@@ -55,7 +54,7 @@ void AHT10_StartMeas()
     SoftI2C_SendByte(0x00);
     SoftI2C_ReceiveACK();
     SoftI2C_Stop();
-    Delay_ms(80);
+//    Delay_ms(80);
 }
 
 uint8_t AHT10_ReadData(float *AHT10_Temp,float *AHT10_RH)

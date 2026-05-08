@@ -4,7 +4,7 @@
 void HardwareSPI_Init(void);
 void HardwareSPI_Start(void);
 void HardwareSPI_Stop(void);
-uint8_t HardwareSPI_SwapByte(uint8_t byte);
+uint8_t HardwareSPI_SwapByte(uint8_t byte_send);
 
 
 #endif

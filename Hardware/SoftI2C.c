@@ -2,39 +2,45 @@
 #include "Delay.h"
 
 
+#define SoftI2C_RCC RCC_APB2Periph_GPIOB
+#define SoftI2C_Port GPIOB
+#define SoftI2C_SCL_Pin GPIO_Pin_6
+#define SoftI2C_SDA_Pin GPIO_Pin_7
 
-void SoftI2C_W_SCL(uint8_t BitValue)
+
+
+static void SoftI2C_W_SCL(uint8_t BitValue)
 {
-    GPIO_WriteBit(GPIOB,GPIO_Pin_6,(BitAction)BitValue);
-    Delay_ms(5);
+    GPIO_WriteBit(SoftI2C_Port,SoftI2C_SCL_Pin,(BitAction)BitValue);
+    Delay_us(5);
 }
 
-void SoftI2C_W_SDA(uint8_t BitValue)
+static void SoftI2C_W_SDA(uint8_t BitValue)
 {
-    GPIO_WriteBit(GPIOB,GPIO_Pin_7,(BitAction)BitValue);
-    Delay_ms(5);
+    GPIO_WriteBit(SoftI2C_Port,SoftI2C_SDA_Pin,(BitAction)BitValue);
+    Delay_us(5);
 }
 
-uint8_t SoftI2C_R_SDA(void)
+static uint8_t SoftI2C_R_SDA(void)
 {
     uint8_t BitValue;
-    BitValue = GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_7);
-    Delay_ms(5);
+    BitValue = GPIO_ReadInputDataBit(SoftI2C_Port,SoftI2C_SDA_Pin);
+    Delay_us(5);
     
     return BitValue;
 }
 
 void SoftI2C_Init(void)
 {
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
+    RCC_APB2PeriphClockCmd(SoftI2C_RCC,ENABLE);
     
     GPIO_InitTypeDef GPIO_InitStructure;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
+    GPIO_InitStructure.GPIO_Pin = SoftI2C_SCL_Pin | SoftI2C_SDA_Pin;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOB,&GPIO_InitStructure);
+    GPIO_Init(SoftI2C_Port,&GPIO_InitStructure);
     
-    GPIO_SetBits(GPIOB,GPIO_Pin_6 | GPIO_Pin_7);
+    GPIO_SetBits(SoftI2C_Port,SoftI2C_SCL_Pin | SoftI2C_SDA_Pin);
 }
 
 void SoftI2C_Start(void)
